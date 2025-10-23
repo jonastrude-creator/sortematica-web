@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Simulador - Sortemática</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=SEU_CODIGO_CLIENTE"
+     crossorigin="anonymous"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>Simulador de Acertos</h1>
+  </header>
+  <main class="container">
+    <div class="simbox">
+      <label for="loteriaSelect">Loteria:</label>
+      <select id="loteriaSelect"></select>
+
+      <label for="dezenasInput">Digite as dezenas (vírgula):</label>
+      <input id="dezenasInput" type="text" placeholder="Ex: 1,2,3,4,5,6">
+
+      <button onclick="simular()">Simular</button>
+      <button onclick="voltar()">Voltar</button>
+
+      <div id="resultado_sim"></div>
+
+      <div class="ad" style="margin-top:20px;">
+        <ins class="adsbygoogle" style="display:block" data-ad-client="SEU_CODIGO_CLIENTE" data-ad-slot="123456" data-ad-format="auto"></ins>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // preencher select com querystring param ou padrão
+    const params = new URLSearchParams(window.location.search);
+    const lot = params.get('loteria') || 'lotofacil';
+    const loterias = ['lotofacil','megasena','quina','diadesorte','maismilionaria'];
+    const sel = document.getElementById('loteriaSelect');
+    loterias.forEach(l => {
+      const opt = document.createElement('option'); opt.value = l; opt.text = l;
+      if (l===lot) opt.selected = true;
+      sel.appendChild(opt);
+    });
+
+    function voltar(){ window.location.href = '/'; }
+
+    async function simular(){
+      const loteria = document.getElementById('loteriaSelect').value;
+      const txt = document.getElementById('dezenasInput').value;
+      const dezenas = txt.split(',').map(x=>parseInt(x.trim())).filter(x=>!isNaN(x));
+      if(!dezenas.length){ alert('Digite ao menos um número válido'); return; }
+      const res = await fetch(`/api/simular/${loteria}`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({dezenas})
+      });
+      const data = await res.json();
+      let html = `<h3>Resultado (${data.loteria}) — ${data.total_concursos} concursos</h3>`;
+      if(!data.resultado || !data.resultado.length){
+        html += `<p>Nenhum acerto relevante encontrado.</p>`;
+      } else {
+        html += `<table class="tbl"><tr><th>Acertos</th><th>Qtd</th><th>%</th><th>Exemplos (concursos)</th></tr>`;
+        data.resultado.forEach(r=>{
+          html += `<tr><td>${r.acertos}</td><td>${r.qtd}</td><td>${r.percentual}%</td><td>${r.exemplos_concursos.slice(0,20).join(', ')}</td></tr>`;
+        });
+        html += `</table>`;
+      }
+      document.getElementById('resultado_sim').innerHTML = html;
+    }
+  </script>
+</body>
+</html>

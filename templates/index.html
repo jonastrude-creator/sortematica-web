@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Sortemática</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Sortemática</h1>
+    <p class="subtitle">Simulador e gerador de palpites inteligentes</p>
+  </header>
+
+  <main class="container">
+    <h2>Escolha sua Loteria</h2>
+
+    <div class="menu">
+      <a class="btn" href="/lotofacil">Lotofacil</a>
+      <a class="btn" href="/megasena">Mega Sena</a>
+      <a class="btn" href="/quina">Quina</a>
+      <a class="btn" href="/maismilionaria">Mais Milionária</a>
+      <a class="btn" href="/diadesorte">Dia de Sorte</a>
+    </div>
+
+    <section id="noticias" class="news">
+      <h3>Últimos resultados</h3>
+      <div id="ultimos_container">Carregando...</div>
+    </section>
+
+    <aside class="notice">
+      <strong>Aviso:</strong> Este site gera apenas simulações e palpites estatísticos. Nenhum resultado é garantido. Aposte com responsabilidade.
+    </aside>
+  </main>
+
+  <footer class="footer">© Sortemática</footer>
+
+  <script src="/static/js/app.js"></script>
+  <script>
+    // Carregar últimos resultados de todas loterias
+    async function carregarUltimos() {
+      const lotes = ['lotofacil','megasena','quina','maismilionaria','diadesorte'];
+      const container = document.getElementById('ultimos_container');
+      container.innerHTML = '';
+      for (const l of lotes) {
+        try {
+          const res = await fetch(`/api/ultimos/${l}?n=2`);
+          const data = await res.json();
+          if (data.ultimos) {
+            const div = document.createElement('div');
+            div.className = 'news-item';
+            div.innerHTML = `<strong>${l.toUpperCase()}</strong>: ${data.ultimos.map(arr => '[' + arr.join(',') + ']').join(' ')}`;
+            container.appendChild(div);
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+    }
+    carregarUltimos();
+  </script>
+</body>
+</html>

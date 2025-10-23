@@ -1,0 +1,21 @@
+/* geral */
+*{box-sizing:border-box}
+body{font-family:Arial, Helvetica, sans-serif;margin:0;background:#f2f6fb;color:#222}
+.topbar{background:linear-gradient(90deg,#0b6fb1,#0d9bd6);color:#fff;padding:18px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.12)}
+.topbar h1{margin:0;font-size:28px}
+.topbar .subtitle{margin:4px 0 0 0;font-size:14px;opacity:0.95}
+.container{max-width:1100px;margin:24px auto;background:#fff;padding:20px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.04)}
+.menu{text-align:center;margin:18px 0}
+.btn{display:inline-block;background:#0d84d6;color:#fff;padding:10px 18px;margin:8px;border-radius:6px;text-decoration:none}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin-bottom:12px}
+.controls label{font-size:14px}
+.controls input[type=number]{width:90px;padding:6px;border-radius:6px;border:1px solid #ddd}
+.controls button{background:#0077c8;color:#fff;padding:8px 12px;border:none;border-radius:6px;cursor:pointer}
+.resultado{background:#f9fbff;padding:12px;border-radius:6px;border:1px dashed #e6f0fb;min-height:80px;margin-bottom:12px}
+.analysis{background:#ffffff;padding:12px;border-radius:6px;border:1px solid #eef6ff;margin-top:12px}
+.notice{background:#eef7ff;padding:12px;border-left:4px solid #62a6e9;border-radius:6px;margin-top:12px}
+.news{margin-top:18px;padding:12px;background:#fff;border-radius:6px;border:1px solid #eef6ff}
+.news-item{padding:6px 0;border-bottom:1px dashed #e6eef8}
+.footer{text-align:center;padding:12px;color:#666;margin-top:20px}
+textarea{width:80%;padding:8px;border-radius:6px;border:1px solid #ddd}
+a{color:#0d84d6}

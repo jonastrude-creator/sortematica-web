@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>Quina - Sortemática</title>
+<link rel="stylesheet" href="/static/css/style.css"></head>
+<body>
+  <header class="topbar">
+    <h1>Sortemática</h1>
+    <p class="subtitle">Simulador e gerador de palpites inteligentes</p>
+    <h2>Quina</h2>
+  </header>
+  <main class="container">
+    <div class="controls">
+      <label>Quantidade de palpites:
+        <input id="palpites_Quina" type="number" value="5" min="1" max="200">
+      </label>
+      <label>Dezenas por jogo:
+        <input id="dezenas_Quina" type="number" value="6" min="6" max="15">
+      </label>
+      <button onclick="gerarPalpites('Quina')">Gerar Palpites</button>
+      <button onclick="carregarAnalise('Quina')">Atualizar Análise</button>
+    </div>
+
+    <div id="resultado_Quina" class="resultado">Use "Gerar Palpites" ou "Atualizar Análise".</div>
+    <div id="simulador_Quina" class="resultado"></div>
+    <section id="analise_fixa_Quina" class="analysis">
+      <h3>Análise Matemática (automática)</h3>
+      <div id="analise_content_Quina">Carregando análise...</div>
+    </section>
+
+    <section class="about">
+      <h4>Como nosso algoritmo funciona (resumo)</h4>
+      <p>O algoritmo combina frequência histórica, persistência (recorrência em janelas), trincas/presenças frequentes, e um índice de força que soma frequência e recorrência. Ao gerar palpites, priorizamos dezenas mais frequentes e adicionamos variabilidade para evitar previsibilidade. A simulação compara seus palpites com resultados históricos (usando os dados do Excel) e mostra quantos acertos cada jogo teria.</p>
+    </section>
+
+    <aside class="notice">
+      <strong>Aviso:</strong> Este site gera apenas simulações e palpites estatísticos. Nenhum resultado é garantido. Aposte com responsabilidade.
+    </aside>
+    <p><a href="/">⬅ Voltar</a></p>
+  </main>
+  <footer class="footer">© Sortemática</footer>
+  <script src="/static/js/app.js"></script>
+  <script>carregarAnalise('Quina');</script>
+</body>
+</html>

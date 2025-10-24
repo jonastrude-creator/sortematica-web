@@ -1,32 +1,30 @@
-# main.py — versão otimizada e compatível com as rotas /api/
-# Sortemática — Simulador e Gerador de Palpites Inteligentes
+# main.py — versão otimizada da Sortemática (carregamento rápido dos resultados)
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import pandas as pd
 import os
 from core.generator import gerar_palpite_inteligente, gerar_analise
 
-app = FastAPI(title="Sortemática - Simulador e Gerador de Palpites Inteligentes")
+app = FastAPI()
 
-# --- Pastas e templates ---
+# --- Pastas padrão ---
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+# --- Caminho dos arquivos Excel ---
 DATA_PATH = "data"
 
 # --- Cache global ---
 cache_resultados = {}
 cache_analises = {}
 
-# ==============================================================
-# 🔧 Funções auxiliares
-# ==============================================================
+# --- Funções auxiliares ---
 
 def carregar_resultados_excel():
-    """Carrega os últimos resultados de todos os jogos e guarda em cache."""
+    """Carrega todos os arquivos Excel uma única vez e guarda em cache."""
     resultados = {}
     for nome in ["LOTOFACIL", "MEGA_SENA", "QUINA", "MAIS_MILIONARIA", "DIA_DE_SORTE"]:
         caminho = os.path.join(DATA_PATH, f"{nome}.xlsx")
@@ -37,13 +35,17 @@ def carregar_resultados_excel():
             df = df.dropna(how="all")
             df.columns = [str(c).strip().lower() for c in df.columns]
 
+            # Identifica colunas relevantes
             col_concurso = next((c for c in df.columns if "concurso" in c), None)
             col_data = next((c for c in df.columns if "data" in c), None)
             col_ganhador = next((c for c in df.columns if "ganh" in c), None)
+
+            # Obtém dezenas (todas as colunas numéricas entre 1 e 80)
             dezenas = [c for c in df.columns if c.isdigit() or c.strip().isdigit()]
             if not dezenas:
                 dezenas = [c for c in df.columns if "dezena" in c or "bola" in c]
 
+            # Pega o último sorteio
             ultimo = df.iloc[-1]
             numeros = [
                 str(int(ultimo[d])) for d in dezenas
@@ -55,7 +57,7 @@ def carregar_resultados_excel():
             ganhadores = str(ultimo[col_ganhador]) if col_ganhador else "Sem info"
             data = str(ultimo[col_data]) if col_data else "Sem data"
 
-            resultados[nome.lower()] = {
+            resultados[nome] = {
                 "concurso": concurso,
                 "numeros": numeros_fmt,
                 "ganhadores": ganhadores,
@@ -67,7 +69,7 @@ def carregar_resultados_excel():
 
 
 def carregar_analises_iniciais():
-    """Gera e guarda as análises iniciais em cache."""
+    """Gera e guarda as análises iniciais em cache para cada jogo."""
     analises = {}
     for nome in ["lotofacil", "megasena", "quina", "maismilionaria", "diadesorte"]:
         try:
@@ -77,10 +79,7 @@ def carregar_analises_iniciais():
     return analises
 
 
-# ==============================================================
-# 🚀 Inicialização com cache (executa só uma vez)
-# ==============================================================
-
+# --- Inicialização com cache ---
 print("🔄 Carregando resultados iniciais...")
 cache_resultados = carregar_resultados_excel()
 print("✅ Resultados carregados com sucesso!")
@@ -90,15 +89,16 @@ cache_analises = carregar_analises_iniciais()
 print("✅ Análises geradas com sucesso!")
 
 
-# ==============================================================
-# 🌐 Rotas principais (páginas)
-# ==============================================================
+# --- Rotas ---
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "resultados": cache_resultados},
+        {
+            "request": request,
+            "resultados": cache_resultados,
+        },
     )
 
 
@@ -106,7 +106,10 @@ async def home(request: Request):
 async def lotofacil(request: Request):
     return templates.TemplateResponse(
         "lotofacil.html",
-        {"request": request, "analise": cache_analises.get("lotofacil", "")},
+        {
+            "request": request,
+            "analise": cache_analises.get("lotofacil", ""),
+        },
     )
 
 
@@ -114,7 +117,10 @@ async def lotofacil(request: Request):
 async def megasena(request: Request):
     return templates.TemplateResponse(
         "megasena.html",
-        {"request": request, "analise": cache_analises.get("megasena", "")},
+        {
+            "request": request,
+            "analise": cache_analises.get("megasena", ""),
+        },
     )
 
 
@@ -122,7 +128,10 @@ async def megasena(request: Request):
 async def quina(request: Request):
     return templates.TemplateResponse(
         "quina.html",
-        {"request": request, "analise": cache_analises.get("quina", "")},
+        {
+            "request": request,
+            "analise": cache_analises.get("quina", ""),
+        },
     )
 
 
@@ -130,7 +139,10 @@ async def quina(request: Request):
 async def maismilionaria(request: Request):
     return templates.TemplateResponse(
         "maismilionaria.html",
-        {"request": request, "analise": cache_analises.get("maismilionaria", "")},
+        {
+            "request": request,
+            "analise": cache_analises.get("maismilionaria", ""),
+        },
     )
 
 
@@ -138,49 +150,23 @@ async def maismilionaria(request: Request):
 async def diadesorte(request: Request):
     return templates.TemplateResponse(
         "diadesorte.html",
-        {"request": request, "analise": cache_analises.get("diadesorte", "")},
+        {
+            "request": request,
+            "analise": cache_analises.get("diadesorte", ""),
+        },
     )
 
 
-# ==============================================================
-# 🧠 Rotas de API (para o front-end JS)
-# ==============================================================
-
-@app.get("/api/ultimos/{jogo}")
-async def api_ultimos(jogo: str):
-    jogo = jogo.lower()
-    dados = cache_resultados.get(jogo)
-    if not dados:
-        return JSONResponse({"erro": f"Sem resultados para {jogo}."}, status_code=404)
-    return JSONResponse(dados)
-
-
-@app.get("/api/analisar/{jogo}")
-async def api_analisar(jogo: str):
-    jogo = jogo.lower()
-    analise = cache_analises.get(jogo)
-    if not analise:
-        try:
-            analise = gerar_analise(jogo)
-            cache_analises[jogo] = analise
-        except Exception as e:
-            return JSONResponse({"erro": str(e)}, status_code=500)
-    return JSONResponse({"analise": analise})
-
-
-@app.get("/api/palpite/{jogo}")
-async def api_palpite(jogo: str, quantidade: int = 1, dezenas_por_jogo: int = None):
+@app.get("/gerar/{jogo}")
+async def gerar_palpite(jogo: str):
     try:
-        palpites = gerar_palpite_inteligente(jogo, quantidade, dezenas_por_jogo)
-        return JSONResponse({"palpites": palpites})
+        palpites = gerar_palpite_inteligente(jogo)
+        return {"palpites": palpites}
     except Exception as e:
-        return JSONResponse({"erro": str(e)}, status_code=500)
+        return {"erro": str(e)}
 
 
-# ==============================================================
-# 🔌 Execução local (Render usa o start.sh)
-# ==============================================================
-
+# --- Rodando localmente ---
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=10000)
